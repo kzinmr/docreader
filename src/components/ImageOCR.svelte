@@ -6,27 +6,27 @@
 	let language = 'eng';
 	let languages: Array<{ name: string; code: string }> = [];
 	let progress = 0;
-  let progressPage = 0;
-  $: progressPageMax = $images.length;
+	let progressPage = 0;
+	$: progressPageMax = $images.length;
+
 	onMount(async () => {
 		const res = await fetch('/language.json');
 		if (res.ok) {
 			languages = await res.json();
 		}
 	});
-	function updateProgress(message: { status: string; progress: number }) {
-		if (message.status === 'recognizing text') {
-			progress = message.progress * 100;
-		}
-	}
+
 	async function ocrMissingAltText() {
+		const updateProgress = (message: { status: string; progress: number }) => {
+			if (message.status === 'recognizing text') {
+				progress = message.progress * 100;
+			}
+		};
 		// Load Tessaract
 		const worker = await createWorker({ logger: (m) => updateProgress(m) });
 		language = localStorage.getItem('language') ?? 'eng';
-		console.log(language.toString());
 		await worker.loadLanguage(language);
 		await worker.initialize(language);
-		// ocrButton.innerText = "";
 
 		// Iterate through all the images in the output div
 		for (const img of $images) {
@@ -54,5 +54,6 @@
 		{/each}
 	</select>
 	<button disabled={$images.length === 0} on:click={ocrMissingAltText}>OCR missing alt text</button>
-	<progress id="ocrProgressBar" value={progress} max="100" /> <span>{`${progressPage}/${progressPageMax}`} </span>
+	<progress id="ocrProgressBar" value={progress} max="100" />
+	<span>{`${progressPage}/${progressPageMax}`} </span>
 </div>
