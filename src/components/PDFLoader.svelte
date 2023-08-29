@@ -65,7 +65,6 @@
 		};
 		// Load Tessaract
 		const worker = await createWorker({ logger: (m) => updateProgress(m) });
-		language = localStorage.getItem('language') ?? 'eng';
 		await worker.loadLanguage(language);
 		await worker.initialize(language);
 
