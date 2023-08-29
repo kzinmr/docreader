@@ -7,8 +7,8 @@
 	import PDFPageCanvas from './PDFPageCanvas.svelte';
 	import { pdfPages } from '../stores';
 
-	pdfjsLib.GlobalWorkerOptions.workerSrc = '../../node_modules/pdfjs-dist/build/pdf.worker.js';
-
+	pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.10.111/pdf.worker.js';
+	
 	type FileContent = {
 		content: Uint8Array;
 		filename: string;
