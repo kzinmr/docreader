@@ -29,7 +29,7 @@
 </script>
 
 <div id="uploader-container">
-  <span>Upload Images:</span>
+	<span>Upload Images:</span>
 	<input type="file" multiple accept="image/*" bind:files />
 	<button on:click={loadFiles}>Load images</button>
 </div>

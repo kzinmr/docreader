@@ -23,6 +23,12 @@
 	let progressPage = 0;
 	$: progressPageMax = $pdfPages.length;
 
+	$: if (files) {
+		// Reset stores when files are changed
+		pdfDoc = null;
+		pdfPages.set([]);
+	}
+
 	onMount(async () => {
 		const res = await fetch('/language.json');
 		if (res.ok) {
@@ -43,7 +49,6 @@
 		});
 	};
 	async function loadPDF() {
-		// const target = event.target as HTMLInputElement;
 		if (files !== null) {
 			const file: File = Array.from(files)[0];
 			const pdfData = await loadFile(file);
@@ -52,7 +57,7 @@
 		}
 	}
 
-	async function ocrMissingAltText() {
+	async function ocrMissingPageText() {
 		const updateProgress = (message: { status: string; progress: number }) => {
 			if (message.status === 'recognizing text') {
 				progress = message.progress * 100;
@@ -64,13 +69,12 @@
 		await worker.loadLanguage(language);
 		await worker.initialize(language);
 
-		// Iterate through all the images in the output div
 		for (const page of $pdfPages) {
 			if (page.text === '') {
 				const {
 					data: { text }
 				} = await worker.recognize(page.imageURL);
-				page.text = text; // Set the OCR result to the alt textarea
+				page.text = text;
 				progressPage += 1;
 			}
 		}
@@ -81,7 +85,7 @@
 </script>
 
 <div id="pdf-uploader">
-  <span>Upload PDF:</span>
+	<span>Upload PDF:</span>
 	<input type="file" bind:files accept="application/pdf" />
 	<button on:click={loadPDF}>Load PDF</button>
 	<span>{`${progressPage}/${progressPageMax}`} </span>
@@ -94,7 +98,9 @@
 		</option>
 	{/each}
 </select>
-<button disabled={$pdfPages.length === 0} on:click={ocrMissingAltText}>OCR missing alt text</button>
+<button disabled={$pdfPages.length === 0} on:click={ocrMissingPageText}
+	>OCR missing page text</button
+>
 <progress id="ocrProgressBar" value={progress} max="100" />
 <span>{`${progressPage}/${progressPageMax}`} </span>
 <div class="pdf-container">
@@ -104,9 +110,8 @@
 				canvasRef={canvasRefs[i]}
 				idx={i}
 				{pdfDoc}
-				alt={$pdfPages[i] !== undefined ? $pdfPages[i].text : ''}
+				pageText={$pdfPages[i] !== undefined ? $pdfPages[i].text : ''}
 			/>
-			<!-- <canvas bind:this={canvasRefs[i]} on:mount={() => renderPage(i + 1, canvasRefs[i])} /> -->
 		{/each}
 	{/if}
 </div>

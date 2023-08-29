@@ -1,20 +1,18 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	// 以下のようにonMountに応じてレンダリングをしたいためにcanvasコンポーネントを分ける
+	// <canvas bind:this={canvasRefs[i]} on:mount={() => renderPage(i + 1, canvasRefs[i])} />
+
+	import { onMount } from 'svelte';
 	import type { PDFDocumentProxy } from 'pdfjs-dist';
 	import { pdfPages } from '../stores';
 
 	export let canvasRef: HTMLCanvasElement | null;
 	export let idx: number;
 	export let pdfDoc: PDFDocumentProxy | null = null;
-	export let alt: string;
+	export let pageText: string;
 
 	onMount(async () => {
 		renderPage(idx + 1, canvasRef);
-	});
-	onDestroy(() => {
-		canvasRef = null;
-		pdfDoc = null;
-		alt = '';
 	});
 
 	async function renderPage(pageNum: number, canvas: HTMLCanvasElement | null) {
@@ -31,7 +29,7 @@
 				};
 				await page.render(renderContext).promise;
 				const imageURL = canvas.toDataURL('image/png');
-				// let pdfTexts = await convertToText(pdf);
+				// Read embedded text in each pages
 				const content = await page.getTextContent({
 					disableNormalization: true,
 					includeMarkedContent: false
@@ -42,7 +40,7 @@
 			}
 		}
 	}
-	function updateAlt(index: number, event: Event) {
+	function updatePageText(index: number, event: Event) {
 		const target = event.target as HTMLTextAreaElement;
 		$pdfPages[index].text = target.value;
 		$pdfPages = $pdfPages;
@@ -54,11 +52,11 @@
 	<div class="progress-textarea-group">
 		<!-- <progress id="ocrProgressBar" value={progress} max="100" /> -->
 		<textarea
-			class="textarea-alt"
-			id={`alt-${idx}`}
-			placeholder="Alt text"
-			bind:value={alt}
-			on:input={(event) => updateAlt(idx, event)}
+			class="textarea-pagetext"
+			id={`text-${idx}`}
+			placeholder="Page text"
+			bind:value={pageText}
+			on:input={(event) => updatePageText(idx, event)}
 		/>
 	</div>
 </div>
@@ -69,7 +67,7 @@
 		height: 100%;
 		background-color: #666;
 	}
-	.textarea-alt {
+	.textarea-pagetext {
 		width: 100%;
 		height: 100%;
 	}
