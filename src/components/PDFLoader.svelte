@@ -4,7 +4,7 @@
 	import type { PDFDocumentProxy } from 'pdfjs-dist';
 	import { createWorker } from 'tesseract.js';
 
-	import PageCanvas from './PageCanvas.svelte';
+	import PDFPageCanvas from './PDFPageCanvas.svelte';
 	import { pdfPages } from '../stores';
 
 	pdfjsLib.GlobalWorkerOptions.workerSrc = '../../node_modules/pdfjs-dist/build/pdf.worker.js';
@@ -106,7 +106,7 @@
 <div class="pdf-container">
 	{#if pdfDoc !== null}
 		{#each Array(pdfDoc.numPages) as _, i}
-			<PageCanvas
+			<PDFPageCanvas
 				canvasRef={canvasRefs[i]}
 				idx={i}
 				{pdfDoc}
